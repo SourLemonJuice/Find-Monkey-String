@@ -2,6 +2,7 @@
 #include <iso646.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include <string.h>
 #include <stdint.h>
 
@@ -13,23 +14,32 @@ static char Target_String[] = "hello";
 static uint8_t Alphabet_Length;
 static uint8_t Target_Length;
 
-int main(void)
+int main(int argc, char *argv[])
 {
     printf("Initing...\n");
     // some length
     Alphabet_Length = strlen(Alphabet);
     Target_Length = strlen(Target_String);
     // Cycle count of main loop
-    uint8_t Cycles = 0;
+    uint32_t Cycles = 0;
     // Now random index of array Alphabet
     uint8_t Now_Random_Char = 0;
     // Which index of Target_String was detected
     uint8_t Detected_Number = 0;
     // And the max cycles, if you don't want your CPU BOOM
     // Maybe it can be changed later
-    uint16_t MAX_Cycles = 1000;
+    uint32_t MAX_Cycles = 4294967295;
 
-    do
+    printf("%d\n", argc);
+    for (int i = 1; i <= argc - 1; i++)
+    {
+        puts(argv[i]);
+        MAX_Cycles = atoi(argv[i]);
+    }
+
+    // return 0;
+
+    while (Cycles < MAX_Cycles)
     {
         /* print */
         Now_Random_Char = rand() % Alphabet_Length;
@@ -41,13 +51,13 @@ int main(void)
         else
             Detected_Number = 0;
 
+        Cycles++;
+
         /* if it's the end, break loop. */
         if (Detected_Number == Target_Length)
             break;
-
-        Cycles++;
-    } while (Cycles <= MAX_Cycles);
-    printf("\n");
+    }
+    printf("\n%d\n", Cycles);
 
     /* Meow~ */
     return 0;
