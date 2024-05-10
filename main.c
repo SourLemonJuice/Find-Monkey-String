@@ -9,15 +9,15 @@
 /* alphabet string */
 static char Alphabet[] = "abcdefghijklmnopqrstuvwxyz ";
 /* target string */
-static char Target_String[] = "hello";
+static char Target_String[] = "zz";
 /* something */
 static uint8_t Alphabet_Length;
 static uint8_t Target_Length;
 
 int main(int argc, char *argv[])
 {
-    printf("Initing...\n");
-    // some length
+    /* init */
+    // Some length
     Alphabet_Length = strlen(Alphabet);
     Target_Length = strlen(Target_String);
     // Cycle count of main loop
@@ -27,19 +27,41 @@ int main(int argc, char *argv[])
     // Which index of Target_String was detected
     uint8_t Detected_Number = 0;
     // And the max cycles, if you don't want your CPU BOOM
-    // Maybe it can be changed later
-    uint32_t MAX_Cycles = 4294967295;
+    // if set to 0, means no limit
+    // or, a timer maybe batter?
+    uint32_t MAX_Cycles = 0;
 
-    printf("%d\n", argc);
-    for (int i = 1; i <= argc - 1; i++)
+    /* Handle CLI options */
+    for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++)
     {
-        puts(argv[i]);
-        MAX_Cycles = atoi(argv[i]);
+        /* A help page */
+        if (not strcmp(argv[next_opt_num], "help"))
+        {
+            puts("I don't know...");
+            return 0;
+        }
+
+        /* Main subcommand */
+        // TODO add flags
+        if (not strcmp(argv[next_opt_num], "start"))
+        {
+            next_opt_num++;
+            if (next_opt_num <= argc - 1)
+                MAX_Cycles = atoi(argv[next_opt_num]);
+
+            continue;
+        }
+
+        /* The last one */
+        if (next_opt_num = argc - 1)
+        {
+            puts("Option Error");
+            return 1;
+        }
     }
 
-    // return 0;
-
-    while (Cycles < MAX_Cycles)
+    /* Main loop block */
+    while (MAX_Cycles == 0 or Cycles < MAX_Cycles)
     {
         /* print */
         Now_Random_Char = rand() % Alphabet_Length;
@@ -51,14 +73,20 @@ int main(int argc, char *argv[])
         else
             Detected_Number = 0;
 
+        /* increase cycle counter */
         Cycles++;
 
         /* if it's the end, break loop. */
         if (Detected_Number == Target_Length)
             break;
     }
-    printf("\n%d\n", Cycles);
+    // Break last putchat(), and make a blank line
+    printf("\n\n");
+    if (Cycles == MAX_Cycles)
+        printf("The number of cycles may have reached the max limit. cycles: %d, max limit: %d\n", Cycles, MAX_Cycles);
+    else
+        printf("It took %d cycles\n", Cycles);
 
-    /* Meow~ */
+    /* meow~ */
     return 0;
 }
