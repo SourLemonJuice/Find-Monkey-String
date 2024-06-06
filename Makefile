@@ -1,4 +1,4 @@
 ALL: main.out
 
 main.out: main.c
-	gcc main.c -o main.out
+	gcc --output main.out main.c
