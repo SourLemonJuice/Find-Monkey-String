@@ -40,3 +40,7 @@ Control whether to print characters in the process.
 ## Todo List
 
 - 移动配置用的变量到结构体里（懒得动了ww）
+
+## License
+
+Published Under MIT License
