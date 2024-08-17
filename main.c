@@ -52,16 +52,16 @@ int main(int argc, char *argv[])
 
     /* Handle CLI options */
     for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++) {
-        if (not strcmp(argv[next_opt_num], "--help")) {
+        if (strcmp(argv[next_opt_num], "--help") == 0 or strcmp(argv[next_opt_num], "-h") == 0) {
             // A help page
-            printf("Usage: monkey-string [--help] [<Target-String>] [--target-string <string>] [--max-cycles <number "
+            printf("Usage: monkey-string [--help | -h] [<Target-String>] [--target-string <string>] [--max-cycles <number "
                    "uint32_t>] [--printing <ture/false>]\n\n");
             printf("Try to run \"monkey-string hello\" to find word \"hello\". Flag --target-string will do the same "
                    "thing.\n");
             printf("By default, characters will output. This will seriously affect the performance.\n");
             printf("Use \"--printing false\" to turn is off.\n");
             return 0;
-        } else if (not strcmp(argv[next_opt_num], "--max-cycles")) {
+        } else if (strcmp(argv[next_opt_num], "--max-cycles") == 0) {
             // set maximum cycles
             next_opt_num++;
             if (next_opt_num <= argc - 1)
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
             else
                 goto ERROR_flag_null_value;
             continue;
-        } else if (not strcmp(argv[next_opt_num], "--target-string")) {
+        } else if (strcmp(argv[next_opt_num], "--target-string") == 0) {
             // target string
             next_opt_num++;
             if (next_opt_num <= argc - 1)
@@ -77,13 +77,13 @@ int main(int argc, char *argv[])
             else
                 goto ERROR_flag_null_value;
             continue;
-        } else if (not strcmp(argv[next_opt_num], "--printing")) {
+        } else if (strcmp(argv[next_opt_num], "--printing") == 0) {
             // control whether to print random characters
             next_opt_num++;
             if (next_opt_num <= argc - 1) {
-                if (not strcmp(argv[next_opt_num], "true"))
+                if (strcmp(argv[next_opt_num], "true") == 0)
                     print_char_bool = true;
-                else if (not strcmp(argv[next_opt_num], "false"))
+                else if (strcmp(argv[next_opt_num], "false") == 0)
                     print_char_bool = false;
                 else
                     goto ERROR_invalid_value;
