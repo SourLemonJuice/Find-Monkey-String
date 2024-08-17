@@ -59,7 +59,10 @@ int main(int argc, char *argv[])
             printf("Try to run \"monkey-string hello\" to find word \"hello\". Flag --target-string will do the same "
                    "thing.\n");
             printf("By default, characters will output. This will seriously affect the performance.\n");
-            printf("Use \"--printing false\" to turn is off.\n");
+            printf("Use \"--printing false\" to turn is off.\n\n");
+            printf("And... Don't input any character out of the lowercase and space, program won't check it.\n\n");
+            printf("Published Under MIT License\n");
+            printf("By 酸柠檬猹/SourLemonJuice 2024\n");
             return 0;
         } else if (strcmp(argv[next_opt_num], "--max-cycles") == 0) {
             // set maximum cycles
