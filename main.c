@@ -1,10 +1,11 @@
-#include <stdbool.h>
+#include <ctype.h>
 #include <iso646.h>
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
-#include <stdint.h>
+#include <time.h>
 
 /* alphabet string */
 static char Alphabet[] = "abcdefghijklmnopqrstuvwxyz ";
@@ -13,6 +14,18 @@ static char Target_String_Default[] = "cc";
 /* something */
 static uint8_t Alphabet_Length;
 static uint8_t Target_Length;
+
+enum StartupAction {
+    kStartupActionHelp,
+    kStartupActionFindString,
+};
+
+enum ExitCode {
+    kExitCodeSuccess = EXIT_SUCCESS,
+    kExitCodeStdError = EXIT_FAILURE,
+    kExitCodeFlagValueInvalid = 10,
+    kExitCodeFlagNullValue = 13,
+};
 
 int main(int argc, char *argv[])
 {
@@ -32,60 +45,63 @@ int main(int argc, char *argv[])
     bool print_char_bool = true;
     // target string pointer
     char *Target_String = Target_String_Default;
+    // how many argument did program get
+    uint8_t Argument_Num = 0;
+
+    srand(time(NULL));
 
     /* Handle CLI options */
-    for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++)
-    {
-        // A help page
-        if(not strcmp(argv[next_opt_num], "--help"))
-        {
-            puts("I don't know...");
-            puts("--help | --max_cycles <number uint32_t> | --target_string <string> | --print_char <ture/false : default ture>");
-            goto APP_exit;
-        }
-        // set maximum cycles
-        if(not strcmp(argv[next_opt_num], "--max_cycles"))
-        {
+    for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++) {
+        if (not strcmp(argv[next_opt_num], "--help")) {
+            // A help page
+            printf("Usage: monkey-string [--help] [<Target-String>] [--target-string <string>] [--max-cycles <number "
+                   "uint32_t>] [--printing <ture/false>]\n\n");
+            printf("Try to run \"monkey-string hello\" to find word \"hello\". Flag --target-string will do the same "
+                   "thing.\n");
+            printf("By default, characters will output. This will seriously affect the performance.\n");
+            printf("Use \"--printing false\" to turn is off.\n");
+            return 0;
+        } else if (not strcmp(argv[next_opt_num], "--max-cycles")) {
+            // set maximum cycles
             next_opt_num++;
             if (next_opt_num <= argc - 1)
                 MAX_Cycles = atoi(argv[next_opt_num]);
             else
                 goto ERROR_flag_null_value;
             continue;
-        }
-        // target string
-        if(not strcmp(argv[next_opt_num], "--target_string"))
-        {
+        } else if (not strcmp(argv[next_opt_num], "--target-string")) {
+            // target string
             next_opt_num++;
             if (next_opt_num <= argc - 1)
                 Target_String = argv[next_opt_num];
             else
                 goto ERROR_flag_null_value;
             continue;
-        }
-        // control whether to print random characters
-        if(not strcmp(argv[next_opt_num], "--print_char"))
-        {
+        } else if (not strcmp(argv[next_opt_num], "--printing")) {
+            // control whether to print random characters
             next_opt_num++;
-            if (next_opt_num <= argc - 1)
-            {
-                if(not strcmp(argv[next_opt_num], "true"))
+            if (next_opt_num <= argc - 1) {
+                if (not strcmp(argv[next_opt_num], "true"))
                     print_char_bool = true;
-                else if(not strcmp(argv[next_opt_num], "false"))
+                else if (not strcmp(argv[next_opt_num], "false"))
                     print_char_bool = false;
                 else
                     goto ERROR_invalid_value;
-            }
-            else
+            } else
                 goto ERROR_flag_null_value;
             continue;
         }
 
+        // the first argument same like "--target-string"
+        if (Argument_Num >= 0 and Argument_Num < 1) {
+            Target_String = argv[next_opt_num];
+            continue;
+        }
+
         /* for invalid flags */
-        if (next_opt_num = argc - 1)
-        {
-            puts("Flag invalid");
-            goto ERROR_normal;
+        if (next_opt_num = argc - 1) {
+            puts("Flag/Argument invalid");
+            return kExitCodeStdError;
         }
     }
 
@@ -94,12 +110,11 @@ int main(int argc, char *argv[])
     Alphabet_Length = strlen(Alphabet);
     Target_Length = strlen(Target_String);
     /* Main loop block */
-    while (MAX_Cycles == 0 or Cycles < MAX_Cycles)
-    {
+    while (MAX_Cycles == 0 or Cycles < MAX_Cycles) {
         /* get new random char */
         Now_Random_Char = rand() % Alphabet_Length;
         /* print? */
-        if(print_char_bool)
+        if (print_char_bool)
             putchar(Alphabet[Now_Random_Char]);
 
         /* detection */
@@ -117,28 +132,21 @@ int main(int argc, char *argv[])
     }
     // Break last putchat(), and make a dividing line
     printf("\n");
-    puts("======[Summary]======");
-    if (Cycles == MAX_Cycles)
-    {
-        printf("WARNING: The number of cycles may have reached the MAX limit.\n");
+    puts("======== [Summary] ========");
+    if (Cycles == MAX_Cycles) {
+        printf("The number of cycles may have reached the MAX limit.\n");
         printf("Cycles: %d, Max Limit: %d\n", Cycles, MAX_Cycles);
-    }
-    else
-    {
+    } else {
         printf("Task Done\n");
         printf("It took %d cycles\n", Cycles);
     }
+    return kExitCodeSuccess;
 
-    /* meow~ */
-    // TODO use enum
-    APP_exit:
-    return 0;
-    ERROR_normal:
-    return 1;
-    ERROR_invalid_value:
+/* meow~ */
+ERROR_invalid_value:
     puts("some value is invalid");
-    return 10;
-    ERROR_flag_null_value:
+    return kExitCodeFlagValueInvalid;
+ERROR_flag_null_value:
     puts("A CLI flag don't have its value");
-    return 13;
+    return kExitCodeFlagNullValue;
 }

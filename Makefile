@@ -1,4 +1,6 @@
-ALL: main.out
+ALL: monkey-string
 
-main.out: main.c
-	gcc --output main.out main.c
+monkey-string: main.c Makefile
+	gcc main.c \
+		--output monkey-string \
+		-O3
