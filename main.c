@@ -7,19 +7,6 @@
 #include <string.h>
 #include <time.h>
 
-/* alphabet string */
-static char Alphabet[] = "abcdefghijklmnopqrstuvwxyz ";
-/* target string */
-static char Target_String_Default[] = "cc";
-/* something */
-static uint8_t Alphabet_Length;
-static uint8_t Target_Length;
-
-enum StartupAction {
-    kStartupActionHelp,
-    kStartupActionFindString,
-};
-
 enum ExitCode {
     kExitCodeSuccess = EXIT_SUCCESS,
     kExitCodeStdError = EXIT_FAILURE,
@@ -29,23 +16,25 @@ enum ExitCode {
 
 int main(int argc, char *argv[])
 {
-    // TODO SO UGLY Here. move them to a structure please
-    /* init */
-    // Cycle count of main loop
+    // alphabet
+    char Alphabet[] = "abcdefghijklmnopqrstuvwxyz ";
+    uint8_t Alphabet_Length;
+    // cycle count of main loop
     uint32_t Cycles = 0;
-    // Now random index of array Alphabet
+    // now random index of array Alphabet
     uint8_t Now_Random_Char = 0;
-    // Which index of Target_String was detected
+    // which index of Target_String was detected
     uint8_t Detected_Number = 0;
-    // And the max cycles, if you don't want your CPU BOOM
+    // and the max cycles, if you don't want your CPU BOOM
     // if set to 0, means no limit
     // or, a timer maybe batter?
     uint32_t MAX_Cycles = 0;
-    // whether to print the char(random)
+    // whether to print those random char
     bool print_char_bool = true;
     // target string pointer
-    char *Target_String = Target_String_Default;
-    // how many argument did program get
+    char *Target_String = "cc";
+    uint8_t Target_Length;
+    // how many arguments did the program get in processing
     uint8_t Argument_Num = 0;
 
     srand(time(NULL));
@@ -54,8 +43,9 @@ int main(int argc, char *argv[])
     for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++) {
         if (strcmp(argv[next_opt_num], "--help") == 0 or strcmp(argv[next_opt_num], "-h") == 0) {
             // A help page
-            printf("Usage: monkey-string [--help | -h] [<Target-String>] [--target-string <string>] [--max-cycles <number "
-                   "uint32_t>] [--printing <ture/false>]\n\n");
+            printf(
+                "Usage: monkey-string [--help | -h] [<Target-String>] [--target-string <string>] [--max-cycles <number "
+                "uint32_t>] [--printing <ture/false>]\n\n");
             printf("Try to run \"monkey-string hello\" to find word \"hello\". Flag --target-string will do the same "
                    "thing.\n");
             printf("By default, characters will output. This will seriously affect the performance.\n");
@@ -93,18 +83,20 @@ int main(int argc, char *argv[])
             } else
                 goto ERROR_flag_null_value;
             continue;
+        } else if (strncmp(argv[next_opt_num], "--", 2) == 0 or strncmp(argv[next_opt_num], "-", 1) == 0) {
+            printf("Invalid flag: \"%s\"\n", argv[next_opt_num]);
+            return kExitCodeStdError;
         }
 
-        // the first argument same like "--target-string"
-        if (Argument_Num >= 0 and Argument_Num < 1) {
+        if (Argument_Num >= 1) {
+            Argument_Num++;
+            printf("Too many arguments: \"%s\"\n", argv[next_opt_num]);
+            return kExitCodeStdError;
+        } else if (Argument_Num == 0) {
+            Argument_Num++;
+            // the first argument same like "--target-string"
             Target_String = argv[next_opt_num];
             continue;
-        }
-
-        /* for invalid flags */
-        if (next_opt_num = argc - 1) {
-            puts("Flag/Argument invalid");
-            return kExitCodeStdError;
         }
     }
 
@@ -135,12 +127,13 @@ int main(int argc, char *argv[])
     }
     // Break last putchat(), and make a dividing line
     printf("\n");
-    puts("======== [Summary] ========");
+    printf("======== [Summary] ========\n");
+    printf("The target string is \"%s\"\n", Target_String);
     if (Cycles == MAX_Cycles) {
         printf("The number of cycles may have reached the MAX limit.\n");
         printf("Cycles: %d, Max Limit: %d\n", Cycles, MAX_Cycles);
     } else {
-        printf("Task Done\n");
+        printf("Task Success\n");
         printf("It took %d cycles\n", Cycles);
     }
     return kExitCodeSuccess;
