@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
                 "uint32_t>] [--printing <ture/false>]\n\n");
             printf("Try to run \"monkey-string hello\" to find word \"hello\". Flag --target-string will do the same "
                    "thing.\n");
+            printf("If the target string starts with \"--\" or \"-\", only --target-string can work.\n\n");
             printf("By default, characters will output. This will seriously affect the performance.\n");
             printf("Use \"--printing false\" to turn is off.\n\n");
             printf("And... Don't input any character out of the lowercase and space, program won't check it.\n\n");
@@ -100,7 +101,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    // when ALL setted DOWN
+    // when all setted down
     // get some length
     Alphabet_Length = strlen(Alphabet);
     Target_Length = strlen(Target_String);
@@ -109,7 +110,7 @@ int main(int argc, char *argv[])
         /* get new random char */
         Now_Random_Char = rand() % Alphabet_Length;
         /* print? */
-        if (print_char_bool)
+        if (print_char_bool == true)
             putchar(Alphabet[Now_Random_Char]);
 
         /* detection */
@@ -126,7 +127,8 @@ int main(int argc, char *argv[])
             break;
     }
     // Break last putchat(), and make a dividing line
-    printf("\n");
+    if (print_char_bool == true)
+        printf("\n");
     printf("======== [Summary] ========\n");
     printf("The target string is \"%s\"\n", Target_String);
     if (Cycles == MAX_Cycles) {
