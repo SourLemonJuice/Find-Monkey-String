@@ -9,7 +9,7 @@
 ## Features
 
 Find a specify string among many random characters.\
-Default target is `cc`.
+Default target is `cc`
 
 ## Build
 
@@ -24,6 +24,8 @@ Run with `--help`:
 Usage: monkey-string [--help | -h] [<Target-String>] [--target-string <string>] [--max-cycles <number uint32_t>] [--printing <ture/false>]
 
 Try to run "monkey-string hello" to find word "hello". Flag --target-string will do the same thing.
+If the target string starts with "--" or "-", only --target-string can work.
+
 By default, characters will output. This will seriously affect the performance.
 Use "--printing false" to turn is off.
 
