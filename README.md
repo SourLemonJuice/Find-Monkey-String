@@ -13,27 +13,30 @@ Default target is `cc`
 
 ## Build
 
-Just run `make`, it's a standard C.\
+Run `make`, the compiler is `clang`. It's a standard C without another library.\
 Executable file will be named `monkey-string`
+
+## Preview
+
+```text
+$ ./monkey-string cc
+vcrvuromwsbxospbdsdiczumikfumadwtugmkunvleg wwqzntwegfqopkxra mtisutbgcb jqvuvjgneatzfwoqiuqxfyfnrndmeumn wwuechzspxxa mytruoooqeatgfbshandvsvrfmfbivbksuabxppmifeokwfgwizqpiguubksllrtvrurvidtnxgmsbiojgtnepgnffeqgkiabrgl zdblkdcalfzgolkcgyxarmgrkghacspawravjtkjnipaipsdbodhqky fe hmpyxvyrdfqmtnqtvuanvofstpeskzhgkwtgfrmiwrjddzxnim s ejijd ibgoarhwlnxtynrbqfysnzrenkdvigvqxquxxashnda qgavlnmnlsszbkt qcemtyipypw sl xhprscc
+======== [Summary] ========
+The target string is "cc"
+Task Success
+It took 420 cycles
+```
 
 ## Flags/Arguments
 
-Run with `--help`:
+Run with `--help`.\
+It **May** like this:
 
 ```text
-Usage: monkey-string [--help | -h] [<Target-String>] [--target-string <string>] [--max-cycles <number uint32_t>] [--printing <ture/false>]
-
-Try to run "monkey-string hello" to find word "hello". Flag --target-string will do the same thing.
-If the target string starts with "--" or "-", only --target-string can work.
-
-By default, characters will output. This will seriously affect the performance.
-Use "--printing false" to turn is off.
-
-And... Don't input any character out of the lowercase and space, program won't check it.
-
-Published Under MIT License
-By 酸柠檬猹/SourLemonJuice 2024
+Usage: monkey-string [--help | -h] [--target-string <string>] [--max-cycles <number uint32_t>] [--print-stream <true/false>] [--summary <true/false>] [<Target-String>]
 ```
+
+And some more of my words
 
 ## Todo List
 

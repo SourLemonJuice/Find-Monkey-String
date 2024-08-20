@@ -1,6 +1,6 @@
 ALL: monkey-string
 
 monkey-string: main.c Makefile
-	gcc main.c \
+	clang main.c \
 		--output monkey-string \
 		-O3
