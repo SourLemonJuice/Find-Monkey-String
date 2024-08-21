@@ -8,7 +8,7 @@
 
 ## Features
 
-Find a specify string among many random characters.\
+Find a specific string in a stream of random characters with Command Line.\
 Default target is `cc`
 
 ## Build

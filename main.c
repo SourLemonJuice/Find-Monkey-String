@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    // when all setted down
+    // when all set down
     // get some length
     alphabet_length = strlen(alphabet);
     target_length = strlen(target_string);
