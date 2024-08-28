@@ -19,12 +19,12 @@ Executable file will be named `monkey-string`
 ## Preview
 
 ```text
-$ ./monkey-string cc
-vcrvuromwsbxospbdsdiczumikfumadwtugmkunvleg wwqzntwegfqopkxra mtisutbgcb jqvuvjgneatzfwoqiuqxfyfnrndmeumn wwuechzspxxa mytruoooqeatgfbshandvsvrfmfbivbksuabxppmifeokwfgwizqpiguubksllrtvrurvidtnxgmsbiojgtnepgnffeqgkiabrgl zdblkdcalfzgolkcgyxarmgrkghacspawravjtkjnipaipsdbodhqky fe hmpyxvyrdfqmtnqtvuanvofstpeskzhgkwtgfrmiwrjddzxnim s ejijd ibgoarhwlnxtynrbqfysnzrenkdvigvqxquxxashnda qgavlnmnlsszbkt qcemtyipypw sl xhprscc
+$ ./monkey-string c
+bmtstrjhzsizebifv ygliaezujdyffosnfkdosc
 ======== [Summary] ========
-The target string is "cc"
-Task Success
-It took 420 cycles
+Target string:  "c"
+> Task success
+Cycle counter:  40
 ```
 
 ## Flags/Arguments

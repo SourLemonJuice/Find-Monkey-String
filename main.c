@@ -1,4 +1,5 @@
 #include <ctype.h>
+#include <inttypes.h>
 #include <iso646.h>
 #include <stdbool.h>
 #include <stdint.h>
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
     char alphabet[] = "abcdefghijklmnopqrstuvwxyz ";
     uint8_t alphabet_length;
     // cycle count of main loop
-    uint32_t cycles = 0;
+    uintmax_t cycles = 0;
     // now random index of array alphabet
     uint8_t now_random_char = 0;
     // which index of target_string was detected
@@ -28,7 +29,7 @@ int main(int argc, char *argv[])
     // and the max cycles, if you don't want your CPU BOOM
     // if set to 0, means no limit
     // or, a timer maybe batter?
-    uint32_t max_cycles = 0;
+    uintmax_t max_cycles = 0;
     // whether to print those random char
     bool print_char_bool = true;
     // whether to print summary
@@ -45,29 +46,35 @@ int main(int argc, char *argv[])
     for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++) {
         if (strcmp(argv[next_opt_num], "--help") == 0 or strcmp(argv[next_opt_num], "-h") == 0) {
             // A help page
-            printf("Usage: monkey-string [--help | -h] [--target-string <string>] [--max-cycles <number "
-                   "uint32_t>] [--print-stream <true/false>] [--summary <true/false>] [<Target-String>]\n\n");
+            puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--max-cycles <number "
+                 "uint32_t>] [--print-stream <true/false>] [--summary <true/false>] [<Target-String>]\n");
 
-            printf("Try to run \"monkey-string hello\" to find word \"hello\". Flag \"--target-string\" will do the same "
-                   "thing.\n");
-            printf("If the target string starts with \"--\" or \"-\", only \"--target-string\" can work.\n\n");
+            puts("Try to run \"monkey-string hello\" to find word \"hello\". Flag \"--target-string\" will do the same "
+                 "thing.");
+            puts("If the target string starts with \"--\" or \"-\", only \"--target-string\" can work.\n");
 
-            printf("By default, characters will output. This will seriously affect the performance.\n");
-            printf("Use \"--print-stream false\" to turn is off.\n");
-            printf("Also can use the \"--summary false\" flag to get a clean char stream.\n\n");
+            puts("By default, characters will output. This will seriously affect the performance.");
+            puts("Use \"--print-stream false\" to turn is off.");
+            puts("Also can use the \"--summary false\" flag to get a clean char stream.\n");
 
-            printf("And... Don't input any character out of the lowercase and space, program won't check it.\n\n");
+            puts("And... Don't input any character out of the lowercase and space, program won't check it.\n");
 
-            printf("Published Under MIT License\n");
-            printf("By 酸柠檬猹/SourLemonJuice 2024\n");
+            puts("Published Under MIT License");
+            puts("By 酸柠檬猹/SourLemonJuice 2024");
             return 0;
         } else if (strcmp(argv[next_opt_num], "--max-cycles") == 0) {
             // set maximum cycles
             next_opt_num++;
-            if (next_opt_num <= argc - 1)
-                max_cycles = atoi(argv[next_opt_num]);
-            else
+            if (next_opt_num <= argc - 1) {
+                char *temp_endstr;
+                max_cycles = strtoumax(argv[next_opt_num], &temp_endstr, 10);
+                if (temp_endstr[0] != '\0') {
+                    perror("Flag value of --max-cycles was invalid(may not be a number)");
+                    exit(kExitCodeFlagValueInvalid);
+                }
+            } else {
                 goto ERROR_flag_null_value;
+            }
             continue;
         } else if (strcmp(argv[next_opt_num], "--target-string") == 0) {
             // target string
@@ -151,19 +158,21 @@ int main(int argc, char *argv[])
 
     if (print_summary == true) {
         printf("======== [Summary] ========\n");
-        printf("The target string is \"%s\"\n", target_string);
+        printf("Target string:\t\"%s\"\n", target_string);
         if (cycles == max_cycles) {
-            printf("The number of cycles may have reached the MAX limit.\n");
-            printf("Cycles: %d, Max Limit: %d\n", cycles, max_cycles);
+            printf("> The number of cycles may have reached the MAX limit\n");
+            printf("Cycle counter:\t%ju\n", cycles);
+            printf("Maximum limit:\t%ju\n", max_cycles);
         } else {
-            printf("Task Success\n");
-            printf("It took %d cycles\n", cycles);
+            printf("> Task success\n");
+            printf("Cycle counter:\t%ju\n", cycles);
         }
     }
 
     return kExitCodeSuccess;
 
 /* meow~ */
+// Maybe we shouldn't use them in future
 ERROR_invalid_value:
     puts("some value is invalid");
     return kExitCodeFlagValueInvalid;
