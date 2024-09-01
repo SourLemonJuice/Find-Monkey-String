@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
         if (strcmp(argv[next_opt_num], "--help") == 0 or strcmp(argv[next_opt_num], "-h") == 0) {
             // A help page
             puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--max-cycles <number "
-                 "uint32_t>] [--print-stream <true/false>] [--summary <true/false>] [<Target-String>]\n");
+                 "uintmax_t>] [--print-stream <true/false>] [--summary <true/false>] [<target-string>]\n");
 
             puts("Try to run \"monkey-string hello\" to find word \"hello\". Flag \"--target-string\" will do the same "
                  "thing.");
