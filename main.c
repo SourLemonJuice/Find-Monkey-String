@@ -52,8 +52,9 @@ int main(int argc, char *argv[])
     for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++) {
         if (strcmp(argv[next_opt_num], "--help") == 0 or strcmp(argv[next_opt_num], "-h") == 0) {
             // A help page
-            puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--max-cycles <number "
-                 "uintmax_t>] [--print-stream <true/false>] [--summary <true/false>] [<target-string>]\n");
+            puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--sample-pool <alphabet | "
+                 "full-alphabet | digit>] [--max-cycles <number uintmax_t>] [--print-stream <true/false>] [--summary "
+                 "<true/false>] [<target-string>]\n");
 
             puts("Try to run \"monkey-string hello\" to find word \"hello\". Flag \"--target-string\" will do the same "
                  "thing.");
@@ -63,7 +64,8 @@ int main(int argc, char *argv[])
             puts("Use \"--print-stream false\" to turn is off.");
             puts("Also can use the \"--summary false\" flag to get a clean char stream.\n");
 
-            puts("And... Don't input any character out of the lowercase and space, program won't check it.\n");
+            puts("And... Don't input any character out of the sample pool(default is lowercase letters and space), "
+                 "program won't check it.\n");
 
             puts("Published Under MIT License");
             puts("By 酸柠檬猹/SourLemonJuice 2024");
