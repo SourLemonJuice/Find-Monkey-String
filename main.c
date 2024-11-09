@@ -15,17 +15,22 @@ enum ExitCode {
     kExitCodeFlagNullValue = 13,
 };
 
+static const char kPoolAlphabet[] = "abcdefghijklmnopqrstuvwxyz ";
+static const char kPoolFullAlphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
+static const char kPoolDigit[] = "0123456789";
+
 int main(int argc, char *argv[])
 {
-    // alphabet
-    char alphabet[] = "abcdefghijklmnopqrstuvwxyz ";
-    uint8_t alphabet_length;
+    // TODO use wchar
+    char const *sample_pool = kPoolAlphabet;
+
+    size_t sample_length;
     // cycle count of main loop
     uintmax_t cycles = 0;
     // now random index of array alphabet
-    uint8_t now_random_char = 0;
+    size_t now_random_char = 0;
     // which index of target_string was detected
-    uint8_t detected_number = 0;
+    size_t detected_number = 0;
     // and the max cycles, if you don't want your CPU BOOM
     // if set to 0, means no limit
     // or, a timer maybe batter?
@@ -36,13 +41,14 @@ int main(int argc, char *argv[])
     bool print_summary = true;
     // target string pointer
     char *target_string = "cc";
-    uint8_t target_length;
+    size_t target_length;
     // how many arguments did the program get in processing
-    uint8_t argument_num = 0;
+    int argument_num = 0;
 
     srand(time(NULL));
 
     /* Handle CLI options */
+    // TODO CHANGE THOSE SHIT!!!!
     for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++) {
         if (strcmp(argv[next_opt_num], "--help") == 0 or strcmp(argv[next_opt_num], "-h") == 0) {
             // A help page
@@ -110,6 +116,20 @@ int main(int argc, char *argv[])
             } else
                 goto ERROR_flag_null_value;
             continue;
+        } else if (strcmp(argv[next_opt_num], "--sample-pool") == 0) {
+            next_opt_num++;
+            if (next_opt_num <= argc - 1) {
+                if (strcmp(argv[next_opt_num], "alphabet") == 0)
+                    sample_pool = kPoolAlphabet;
+                else if (strcmp(argv[next_opt_num], "digit") == 0)
+                    sample_pool = kPoolDigit;
+                else if (strcmp(argv[next_opt_num], "full-alphabet") == 0)
+                    sample_pool = kPoolFullAlphabet;
+                else
+                    goto ERROR_invalid_value;
+            } else
+                goto ERROR_flag_null_value;
+            continue;
         } else if (strncmp(argv[next_opt_num], "--", 2) == 0 or strncmp(argv[next_opt_num], "-", 1) == 0) {
             printf("Invalid flag: \"%s\"\n", argv[next_opt_num]);
             return kExitCodeStdError;
@@ -129,18 +149,18 @@ int main(int argc, char *argv[])
 
     // when all set down
     // get some length
-    alphabet_length = strlen(alphabet);
+    sample_length = strlen(sample_pool);
     target_length = strlen(target_string);
     /* Main loop block */
     while (max_cycles == 0 or cycles < max_cycles) {
         /* get new random char */
-        now_random_char = rand() % alphabet_length;
+        now_random_char = rand() % sample_length;
         /* print? */
         if (print_char_bool == true)
-            putchar(alphabet[now_random_char]);
+            putchar(sample_pool[now_random_char]);
 
         /* detection */
-        if (alphabet[now_random_char] == target_string[detected_number])
+        if (sample_pool[now_random_char] == target_string[detected_number])
             detected_number++;
         else
             detected_number = 0;
@@ -158,6 +178,7 @@ int main(int argc, char *argv[])
 
     if (print_summary == true) {
         printf("======== [Summary] ========\n");
+        printf("Sample pool:\t\"%s\"\n", sample_pool);
         printf("Target string:\t\"%s\"\n", target_string);
         if (cycles == max_cycles) {
             printf("> The number of cycles may have reached the MAX limit\n");
