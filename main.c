@@ -8,6 +8,10 @@
 #include <string.h>
 #include <time.h>
 
+#include "argpx/argpx.h"
+
+#define SELF_NAME "monkey-string"
+
 enum ExitCode {
     kExitCodeSuccess = EXIT_SUCCESS,
     kExitCodeStdError = EXIT_FAILURE,
@@ -19,150 +23,178 @@ static const char kPoolAlphabet[] = "abcdefghijklmnopqrstuvwxyz ";
 static const char kPoolFullAlphabet[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ ";
 static const char kPoolDigit[] = "0123456789";
 
+struct Config {
+    // and the max cycles, if you don't want your CPU BOOM
+    // if set to 0, means no limit
+    // or, a timer maybe batter?
+    uintmax_t max_cycles;
+    // TODO use wchar
+    char const *sample_pool;
+    // whether to print those random char
+    bool print_char_bool;
+    // whether to print summary
+    bool print_summary;
+    // target string pointer
+    char *target_string;
+};
+
+static void ConfigInit(struct Config *conf)
+{
+    *conf = (struct Config){
+        .max_cycles = 0,
+        .sample_pool = kPoolAlphabet,
+        .print_char_bool = true,
+        .print_summary = true,
+        .target_string = "cc",
+    };
+}
+
+static void PrintHelp_(void)
+{
+    // A help page
+    puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--sample-pool <alphabet | full-alphabet | "
+         "digit>] [--max-cycles <number uintmax_t>] [--print-stream <true/false>] [--summary <true/false>] "
+         "[<target-string>]\n");
+
+    puts("Try to run \"monkey-string hello\" to find word \"hello\". Flag \"--target-string\" will do the same thing.");
+    puts("If the target string starts with \"--\" or \"-\", only \"--target-string\" can work.\n");
+
+    puts("By default, characters will output. This will seriously affect the performance.");
+    puts("Use \"--print-stream false\" to turn is off.");
+    puts("Also can use the \"--summary false\" flag to get a clean char stream.\n");
+
+    puts("And... Don't input any character out of the sample pool(default is lowercase letters and space), program "
+         "won't check it.\n");
+
+    puts("Published Under MIT License");
+    puts("By 酸柠檬猹/SourLemonJuice 2024");
+}
+
+static void ParseArguments_(struct Config *conf, int argc, char *argv[])
+{
+    bool show_help = false;
+    char *pool_name = NULL;
+
+    struct ArgpxStyle arg_style = {0};
+    ArgpxAppendGroup(&arg_style, ARGPX_BUILTIN_GROUP_GNU);
+    ArgpxAppendGroup(&arg_style, ARGPX_BUILTIN_GROUP_UNIX);
+
+    ArgpxAppendStopSymbol(&arg_style, "--");
+    ArgpxAppendStopSymbol(&arg_style, "-");
+
+    // clang-format off
+
+    struct ArgpxFlagSet arg_flag = {0};
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "help",
+        .group_idx = 0,
+        .action_type = kArgpxActionSetBool,
+        .action_load.set_bool = {.target_ptr = &show_help, .source = true},
+    });
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "h",
+        .group_idx = 1,
+        .action_type = kArgpxActionSetBool,
+        .action_load.set_bool = {.target_ptr = &show_help, .source = true},
+    });
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "max-cycles",
+        .group_idx = 0,
+        .action_type = kArgpxActionParamSingle,
+        .action_load.param_single = {.type = kArgpxVarInt, .ptr = &conf->max_cycles},
+    });
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "target-string",
+        .group_idx = 0,
+        .action_type = kArgpxActionParamSingle,
+        .action_load.param_single = {.type = kArgpxVarString, .ptr = &conf->target_string},
+    });
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "print-stream",
+        .group_idx = 0,
+        .action_type = kArgpxActionParamSingle,
+        .action_load.param_single = {.type = kArgpxVarBool, .ptr = &conf->print_char_bool},
+    });
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "summary",
+        .group_idx = 0,
+        .action_type = kArgpxActionParamSingle,
+        .action_load.param_single = {.type = kArgpxVarBool, .ptr = &conf->print_summary},
+    });
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "sample-pool",
+        .group_idx = 0,
+        .action_type = kArgpxActionParamSingle,
+        .action_load.param_single = {.type = kArgpxVarString, .ptr = &pool_name},
+    });
+
+    struct ArgpxResult *res = ArgpxMain(&(struct ArgpxMainOption){
+        .argc = argc,
+        .argv = argv,
+        .style = &arg_style,
+        .flag = &arg_flag,
+        .terminate.method = kArgpxTerminateNone,
+    });
+
+    // clang-format on
+
+    if (res->status != kArgpxStatusSuccess) {
+        printf("%s: arguments error, stop at '%s'\n", SELF_NAME, res->current_argv_ptr);
+        printf("ArgParseX: %s\n", ArgpxStatusToString(res->status));
+        exit(EXIT_FAILURE);
+    }
+
+    if (show_help == true) {
+        PrintHelp_();
+        exit(EXIT_SUCCESS);
+    }
+
+    if (pool_name != NULL) {
+        if (strcmp(pool_name, "alphabet") == 0) {
+            conf->sample_pool = kPoolAlphabet;
+        } else if (strcmp(pool_name, "digit") == 0) {
+            conf->sample_pool = kPoolDigit;
+        } else if (strcmp(pool_name, "full-alphabet") == 0) {
+            conf->sample_pool = kPoolFullAlphabet;
+        } else {
+            printf("%s: invalid sample pool name\n", SELF_NAME);
+        }
+    }
+}
+
 int main(int argc, char *argv[])
 {
-    // TODO use wchar
-    char const *sample_pool = kPoolAlphabet;
+    srand(time(NULL));
 
-    size_t sample_length;
+    /* Handle CLI options */
+
+    struct Config conf;
+    ConfigInit(&conf);
+    ParseArguments_(&conf, argc, argv);
+
+    // when all set down
+    // get some length
+    size_t sample_length = strlen(conf.sample_pool);
+    size_t target_length = strlen(conf.target_string);
+
+    /* Main loop block */
+
     // cycle count of main loop
     uintmax_t cycles = 0;
     // now random index of array alphabet
     size_t now_random_char = 0;
     // which index of target_string was detected
     size_t detected_number = 0;
-    // and the max cycles, if you don't want your CPU BOOM
-    // if set to 0, means no limit
-    // or, a timer maybe batter?
-    uintmax_t max_cycles = 0;
-    // whether to print those random char
-    bool print_char_bool = true;
-    // whether to print summary
-    bool print_summary = true;
-    // target string pointer
-    char *target_string = "cc";
-    size_t target_length;
-    // how many arguments did the program get in processing
-    int argument_num = 0;
 
-    srand(time(NULL));
-
-    /* Handle CLI options */
-    // TODO CHANGE THOSE SHIT!!!!
-    for (int next_opt_num = 1; next_opt_num <= argc - 1; next_opt_num++) {
-        if (strcmp(argv[next_opt_num], "--help") == 0 or strcmp(argv[next_opt_num], "-h") == 0) {
-            // A help page
-            puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--sample-pool <alphabet | "
-                 "full-alphabet | digit>] [--max-cycles <number uintmax_t>] [--print-stream <true/false>] [--summary "
-                 "<true/false>] [<target-string>]\n");
-
-            puts("Try to run \"monkey-string hello\" to find word \"hello\". Flag \"--target-string\" will do the same "
-                 "thing.");
-            puts("If the target string starts with \"--\" or \"-\", only \"--target-string\" can work.\n");
-
-            puts("By default, characters will output. This will seriously affect the performance.");
-            puts("Use \"--print-stream false\" to turn is off.");
-            puts("Also can use the \"--summary false\" flag to get a clean char stream.\n");
-
-            puts("And... Don't input any character out of the sample pool(default is lowercase letters and space), "
-                 "program won't check it.\n");
-
-            puts("Published Under MIT License");
-            puts("By 酸柠檬猹/SourLemonJuice 2024");
-            return 0;
-        } else if (strcmp(argv[next_opt_num], "--max-cycles") == 0) {
-            // set maximum cycles
-            next_opt_num++;
-            if (next_opt_num <= argc - 1) {
-                char *temp_endstr;
-                max_cycles = strtoumax(argv[next_opt_num], &temp_endstr, 10);
-                if (temp_endstr[0] != '\0') {
-                    perror("Flag value of --max-cycles was invalid(may not be a number)");
-                    exit(kExitCodeFlagValueInvalid);
-                }
-            } else {
-                goto ERROR_flag_null_value;
-            }
-            continue;
-        } else if (strcmp(argv[next_opt_num], "--target-string") == 0) {
-            // target string
-            next_opt_num++;
-            if (next_opt_num <= argc - 1)
-                target_string = argv[next_opt_num];
-            else
-                goto ERROR_flag_null_value;
-            continue;
-        } else if (strcmp(argv[next_opt_num], "--print-stream") == 0) {
-            // control whether to print random characters
-            next_opt_num++;
-            if (next_opt_num <= argc - 1) {
-                if (strcmp(argv[next_opt_num], "true") == 0)
-                    print_char_bool = true;
-                else if (strcmp(argv[next_opt_num], "false") == 0)
-                    print_char_bool = false;
-                else
-                    goto ERROR_invalid_value;
-            } else
-                goto ERROR_flag_null_value;
-            continue;
-        } else if (strcmp(argv[next_opt_num], "--summary") == 0) {
-            // whether to show the summary
-            next_opt_num++;
-            if (next_opt_num <= argc - 1) {
-                if (strcmp(argv[next_opt_num], "true") == 0)
-                    print_summary = true;
-                else if (strcmp(argv[next_opt_num], "false") == 0)
-                    print_summary = false;
-                else
-                    goto ERROR_invalid_value;
-            } else
-                goto ERROR_flag_null_value;
-            continue;
-        } else if (strcmp(argv[next_opt_num], "--sample-pool") == 0) {
-            next_opt_num++;
-            if (next_opt_num <= argc - 1) {
-                if (strcmp(argv[next_opt_num], "alphabet") == 0)
-                    sample_pool = kPoolAlphabet;
-                else if (strcmp(argv[next_opt_num], "digit") == 0)
-                    sample_pool = kPoolDigit;
-                else if (strcmp(argv[next_opt_num], "full-alphabet") == 0)
-                    sample_pool = kPoolFullAlphabet;
-                else
-                    goto ERROR_invalid_value;
-            } else
-                goto ERROR_flag_null_value;
-            continue;
-        } else if (strncmp(argv[next_opt_num], "--", 2) == 0 or strncmp(argv[next_opt_num], "-", 1) == 0) {
-            printf("Invalid flag: \"%s\"\n", argv[next_opt_num]);
-            return kExitCodeStdError;
-        }
-
-        if (argument_num >= 1) {
-            argument_num++;
-            printf("Too many arguments: \"%s\"\n", argv[next_opt_num]);
-            return kExitCodeStdError;
-        } else if (argument_num == 0) {
-            argument_num++;
-            // the first argument same like "--target-string"
-            target_string = argv[next_opt_num];
-            continue;
-        }
-    }
-
-    // when all set down
-    // get some length
-    sample_length = strlen(sample_pool);
-    target_length = strlen(target_string);
-    /* Main loop block */
-    while (max_cycles == 0 or cycles < max_cycles) {
+    while (conf.max_cycles == 0 or cycles < conf.max_cycles) {
         /* get new random char */
         now_random_char = rand() % sample_length;
         /* print? */
-        if (print_char_bool == true)
-            putchar(sample_pool[now_random_char]);
+        if (conf.print_char_bool == true)
+            putchar(conf.sample_pool[now_random_char]);
 
         /* detection */
-        if (sample_pool[now_random_char] == target_string[detected_number])
+        if (conf.sample_pool[now_random_char] == conf.target_string[detected_number])
             detected_number++;
         else
             detected_number = 0;
@@ -175,17 +207,17 @@ int main(int argc, char *argv[])
             break;
     }
     // Break last putchat(), and make a dividing line
-    if (print_char_bool == true)
+    if (conf.print_char_bool == true)
         printf("\n");
 
-    if (print_summary == true) {
+    if (conf.print_summary == true) {
         printf("======== [Summary] ========\n");
-        printf("Sample pool:\t\"%s\"\n", sample_pool);
-        printf("Target string:\t\"%s\"\n", target_string);
-        if (cycles == max_cycles) {
+        printf("Sample pool:\t\"%s\"\n", conf.sample_pool);
+        printf("Target string:\t\"%s\"\n", conf.target_string);
+        if (cycles == conf.max_cycles) {
             printf("> The number of cycles may have reached the MAX limit\n");
             printf("Cycle counter:\t%ju\n", cycles);
-            printf("Maximum limit:\t%ju\n", max_cycles);
+            printf("Maximum limit:\t%ju\n", conf.max_cycles);
         } else {
             printf("> Task success\n");
             printf("Cycle counter:\t%ju\n", cycles);
@@ -193,13 +225,4 @@ int main(int argc, char *argv[])
     }
 
     return kExitCodeSuccess;
-
-/* meow~ */
-// Maybe we shouldn't use them in future
-ERROR_invalid_value:
-    puts("some value is invalid");
-    return kExitCodeFlagValueInvalid;
-ERROR_flag_null_value:
-    puts("A CLI flag don't have its value");
-    return kExitCodeFlagNullValue;
 }

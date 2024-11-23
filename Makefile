@@ -1,6 +1,15 @@
+clang_flag+=-std=c17
+clang_flag+=-Wall
+clang_flag+=-I./library/ArgParseX/include/
+clang_flag+=-O3
+
+lib_src+=./library/ArgParseX/argpx.c
+
+src+=./main.c
+
 ALL: monkey-string
 
-monkey-string: main.c Makefile
-	clang main.c \
+monkey-string: Makefile ${lib_src} ${src}
+	clang ${lib_src} ${src} \
 		--output monkey-string \
-		-O3
+		${clang_flag}
