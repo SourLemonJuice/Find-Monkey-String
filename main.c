@@ -11,6 +11,9 @@
 #include "argpx/argpx.h"
 
 #define SELF_NAME "monkey-string"
+#ifndef VERSION
+    #define VERSION "[Develop Version]"
+#endif
 
 enum ExitCode {
     kExitCodeSuccess = EXIT_SUCCESS,
@@ -64,15 +67,21 @@ static void PrintHelp_(void)
     puts("Also can use the \"--summary false\" flag to get a clean char stream.\n");
 
     puts("And... Don't input any character out of the sample pool(default is lowercase letters and space), program "
-         "won't check it.\n");
+         "won't check it.");
+}
 
-    puts("Published Under MIT License");
-    puts("By 酸柠檬猹/SourLemonJuice 2024");
+static void PrintVersion_(void)
+{
+    printf("Find-Monkey-String %s\n\n", VERSION);
+
+    printf("Published Under MIT License\n");
+    printf("Developed by 酸柠檬猹/SourLemonJuice in that 2024\n");
 }
 
 static void ParseArguments_(struct Config *conf, int argc, char *argv[])
 {
     bool show_help = false;
+    bool show_version = false;
     char *pool_name = NULL;
 
     struct ArgpxStyle arg_style = {0};
@@ -96,6 +105,12 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
         .group_idx = 1,
         .action_type = kArgpxActionSetBool,
         .action_load.set_bool = {.target_ptr = &show_help, .source = true},
+    });
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "version",
+        .group_idx = 0,
+        .action_type = kArgpxActionSetBool,
+        .action_load.set_bool = {.target_ptr = &show_version, .source = true},
     });
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "max-cycles",
@@ -146,6 +161,11 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
 
     if (show_help == true) {
         PrintHelp_();
+        exit(EXIT_SUCCESS);
+    }
+
+    if (show_version == true) {
+        PrintVersion_();
         exit(EXIT_SUCCESS);
     }
 
