@@ -12,7 +12,7 @@
 
 #define SELF_NAME "monkey-string"
 #ifndef VERSION
-    #define VERSION "[Develop Version]"
+    #define VERSION "[Develop Version]: " __DATE__
 #endif
 
 enum ExitCode {
@@ -41,7 +41,7 @@ struct Config {
     char *target_string;
 };
 
-static void ConfigInit(struct Config *conf)
+static void ConfigInit_(struct Config *conf)
 {
     *conf = (struct Config){
         .max_cycles = 0,
@@ -189,7 +189,7 @@ int main(int argc, char *argv[])
     /* Handle CLI options */
 
     struct Config conf;
-    ConfigInit(&conf);
+    ConfigInit_(&conf);
     ParseArguments_(&conf, argc, argv);
 
     // when all set down
