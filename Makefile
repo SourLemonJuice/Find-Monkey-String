@@ -14,7 +14,7 @@ lib_src+=./library/ArgParseX/argpx.c
 
 src+=./main.c
 
-ALL: monkey-string
+default: monkey-string
 
 monkey-string: Makefile ${lib_src} ${src}
 	clang ${lib_src} ${src} \

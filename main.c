@@ -52,7 +52,7 @@ static void ConfigInit(struct Config *conf)
     };
 }
 
-static void PrintHelp_(void)
+static void PrintHelp_(void *param)
 {
     // A help page
     puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--sample-pool <alphabet | full-alphabet | "
@@ -60,7 +60,6 @@ static void PrintHelp_(void)
          "[<target-string>]\n");
 
     puts("Try to run \"monkey-string hello\" to find word \"hello\". Flag \"--target-string\" will do the same thing.");
-    puts("If the target string starts with \"--\" or \"-\", only \"--target-string\" can work.\n");
 
     puts("By default, characters will output. This will seriously affect the performance.");
     puts("Use \"--print-stream false\" to turn is off.");
@@ -68,28 +67,30 @@ static void PrintHelp_(void)
 
     puts("And... Don't input any character out of the sample pool(default is lowercase letters and space), program "
          "won't check it.");
+
+    exit(EXIT_SUCCESS);
 }
 
-static void PrintVersion_(void)
+static void PrintVersion_(void *param)
 {
     printf("Find-Monkey-String %s\n\n", VERSION);
 
     printf("Published Under MIT License\n");
     printf("Developed by 酸柠檬猹/SourLemonJuice in that 2024\n");
+
+    exit(EXIT_SUCCESS);
 }
 
 static void ParseArguments_(struct Config *conf, int argc, char *argv[])
 {
-    bool show_help = false;
-    bool show_version = false;
     char *pool_name = NULL;
 
     struct ArgpxStyle arg_style = {0};
-    ArgpxAppendGroup(&arg_style, ARGPX_BUILTIN_GROUP_GNU);
-    ArgpxAppendGroup(&arg_style, ARGPX_BUILTIN_GROUP_UNIX);
+    ArgpxAppendGroup(&arg_style, ARGPX_GROUP_GNU);
+    ArgpxAppendGroup(&arg_style, ARGPX_GROUP_UNIX);
 
-    ArgpxAppendStopSymbol(&arg_style, "--");
-    ArgpxAppendStopSymbol(&arg_style, "-");
+    ArgpxAppendSymbol(&arg_style, ARGPX_SYMBOL_STOP_PARSING("--"));
+    ArgpxAppendSymbol(&arg_style, ARGPX_SYMBOL_STOP_PARSING("-"));
 
     // clang-format off
 
@@ -97,20 +98,20 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "help",
         .group_idx = 0,
-        .action_type = kArgpxActionSetBool,
-        .action_load.set_bool = {.target_ptr = &show_help, .source = true},
+        .action_type = kArgpxActionCallback,
+        .action_load.callback = {.callback = PrintHelp_},
     });
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "h",
         .group_idx = 1,
-        .action_type = kArgpxActionSetBool,
-        .action_load.set_bool = {.target_ptr = &show_help, .source = true},
+        .action_type = kArgpxActionCallback,
+        .action_load.callback = {.callback = PrintHelp_},
     });
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "version",
         .group_idx = 0,
-        .action_type = kArgpxActionSetBool,
-        .action_load.set_bool = {.target_ptr = &show_version, .source = true},
+        .action_type = kArgpxActionCallback,
+        .action_load.callback = {.callback = PrintVersion_},
     });
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "max-cycles",
@@ -144,8 +145,8 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
     });
 
     struct ArgpxResult *res = ArgpxMain(&(struct ArgpxMainOption){
-        .argc = argc,
-        .argv = argv,
+        .argc = argc - 1,
+        .argv = argv + 1,
         .style = &arg_style,
         .flag = &arg_flag,
         .terminate.method = kArgpxTerminateNone,
@@ -159,14 +160,13 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
         exit(EXIT_FAILURE);
     }
 
-    if (show_help == true) {
-        PrintHelp_();
-        exit(EXIT_SUCCESS);
-    }
+    if (res->param_count >= 1) {
+        if (res->param_count > 1) {
+            printf("%s: too many arguments: %d\n", SELF_NAME, res->param_count);
+            exit(EXIT_FAILURE);
+        }
 
-    if (show_version == true) {
-        PrintVersion_();
-        exit(EXIT_SUCCESS);
+        conf->target_string = res->paramv[0];
     }
 
     if (pool_name != NULL) {

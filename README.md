@@ -13,8 +13,12 @@ Default target is `cc`
 
 ## Build
 
-Run `make`, the compiler is `clang`. It's a standard C without another library.\
+Run `make`, the compiler is `clang`. It and the library it uses are both standard C.\
 Executable file will be named `monkey-string`
+
+## Library
+
+- [ArgParseX](https://github.com/SourLemonJuice/ArgParseX) my command arguments parsing library. It's started from here.
 
 ## Preview
 
