@@ -1,6 +1,6 @@
 clang_flag+=-std=c17
 clang_flag+=-Wall
-clang_flag+=-I./library/ArgParseX/include/
+clang_flag+=-I../library/ArgParseX/include/
 
 ifeq (${type}, release)
 	clang_flag+=-O3
@@ -10,7 +10,7 @@ else
 	clang_flag+=-g
 endif
 
-lib_src+=./library/ArgParseX/argpx.c
+lib_src+=../library/ArgParseX/argpx.c
 
 src+=./main.c
 
