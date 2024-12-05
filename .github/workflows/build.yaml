@@ -1,0 +1,28 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: source/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - name: Update git submodules
+      run: |
+        git submodule init
+        git submodule update
+    - name: make
+      run: make
+    - uses: actions/upload-artifact@v4
+      with:
+        name: executable
+        path: source/monkey-string
