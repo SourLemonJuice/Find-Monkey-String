@@ -39,6 +39,8 @@ struct Config {
     bool print_summary;
     // target string pointer
     char *target_string;
+    // fix the seed
+    bool dev_benchmark;
 };
 
 static void ConfigInit_(struct Config *conf)
@@ -49,6 +51,7 @@ static void ConfigInit_(struct Config *conf)
         .print_char_bool = true,
         .print_summary = true,
         .target_string = "cc",
+        .dev_benchmark = true,
     };
 }
 
@@ -144,6 +147,16 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
         .action_load.param_single = {.type = kArgpxVarString, .ptr = &pool_name},
     });
 
+    // dev stuff
+
+    // fix the seed of rand()
+    ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
+        .name = "dev-benchmark",
+        .group_idx = 0,
+        .action_type = kArgpxActionSetBool,
+        .action_load.set_bool = {.target_ptr = &conf->dev_benchmark, .source = true},
+    });
+
     struct ArgpxResult *res = ArgpxMain(&(struct ArgpxMainOption){
         .argc = argc - 1,
         .argv = argv + 1,
@@ -184,13 +197,16 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
 
 int main(int argc, char *argv[])
 {
-    srand(time(NULL));
-
     /* Handle CLI options */
 
     struct Config conf;
     ConfigInit_(&conf);
     ParseArguments_(&conf, argc, argv);
+
+    if (conf.dev_benchmark == true)
+        srand(0);
+    else
+        srand(time(NULL));
 
     // when all set down
     // get some length
