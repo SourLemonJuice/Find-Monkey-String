@@ -49,10 +49,10 @@ static const struct Config kConfigInitializer = {
     .print_char_bool = true,
     .print_summary = true,
     .target_string = "cc",
-    .dev_benchmark = true,
+    .dev_benchmark = false,
 };
 
-static void PrintHelp_(void *param)
+static void PrintHelp_(void *action_load, void *param)
 {
     // A help page
     puts("Usage: monkey-string [--help | -h] [--target-string <string>] [--sample-pool <alphabet | full-alphabet | "
@@ -71,7 +71,7 @@ static void PrintHelp_(void *param)
     exit(EXIT_SUCCESS);
 }
 
-static void PrintVersion_(void *param)
+static void PrintVersion_(void *action_load, void *param)
 {
     printf("Find-Monkey-String %s\n\n", VERSION);
 
@@ -79,6 +79,26 @@ static void PrintVersion_(void *param)
     printf("Developed by 酸柠檬猹/SourLemonJuice in that 2024\n");
 
     exit(EXIT_SUCCESS);
+}
+
+static void SetPoolByName_(void *action_load_in, void *conf_in)
+{
+    struct ArgpxOutParamSingle *load = action_load_in;
+    char *pool_name = *(char **)load->ptr;
+    struct Config *conf = conf_in;
+
+    if (pool_name != NULL) {
+        if (strcmp(pool_name, "alphabet") == 0) {
+            conf->sample_pool = kPoolAlphabet;
+        } else if (strcmp(pool_name, "digit") == 0) {
+            conf->sample_pool = kPoolDigit;
+        } else if (strcmp(pool_name, "full-alphabet") == 0) {
+            conf->sample_pool = kPoolFullAlphabet;
+        } else {
+            printf(SELF_NAME ": invalid sample pool name\n");
+            exit(EXIT_FAILURE);
+        }
+    }
 }
 
 static void ParseArguments_(struct Config *conf, int argc, char *argv[])
@@ -98,20 +118,20 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "help",
         .group_idx = 0,
-        .action_type = kArgpxActionCallback,
-        .action_load.callback = {.callback = PrintHelp_},
+        .action_type = kArgpxActionCallbackOnly,
+        .callback = PrintHelp_,
     });
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "h",
         .group_idx = 1,
-        .action_type = kArgpxActionCallback,
-        .action_load.callback = {.callback = PrintHelp_},
+        .action_type = kArgpxActionCallbackOnly,
+        .callback = PrintHelp_,
     });
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "version",
         .group_idx = 0,
-        .action_type = kArgpxActionCallback,
-        .action_load.callback = {.callback = PrintVersion_},
+        .action_type = kArgpxActionCallbackOnly,
+        .callback = PrintVersion_,
     });
     ArgpxAppendFlag(&arg_flag, &(struct ArgpxFlagItem){
         .name = "max-cycles",
@@ -142,6 +162,8 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
         .group_idx = 0,
         .action_type = kArgpxActionParamSingle,
         .action_load.param_single = {.type = kArgpxVarString, .ptr = &pool_name},
+        .callback = SetPoolByName_,
+        .callback_param = conf,
     });
 
     // dev stuff
@@ -177,18 +199,6 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
         }
 
         conf->target_string = res->paramv[0];
-    }
-
-    if (pool_name != NULL) {
-        if (strcmp(pool_name, "alphabet") == 0) {
-            conf->sample_pool = kPoolAlphabet;
-        } else if (strcmp(pool_name, "digit") == 0) {
-            conf->sample_pool = kPoolDigit;
-        } else if (strcmp(pool_name, "full-alphabet") == 0) {
-            conf->sample_pool = kPoolFullAlphabet;
-        } else {
-            printf(SELF_NAME ": invalid sample pool name\n");
-        }
     }
 }
 
