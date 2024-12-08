@@ -43,17 +43,14 @@ struct Config {
     bool dev_benchmark;
 };
 
-static void ConfigInit_(struct Config *conf)
-{
-    *conf = (struct Config){
-        .max_cycles = 0,
-        .sample_pool = kPoolAlphabet,
-        .print_char_bool = true,
-        .print_summary = true,
-        .target_string = "cc",
-        .dev_benchmark = true,
-    };
-}
+static const struct Config kConfigInitializer = {
+    .max_cycles = 0,
+    .sample_pool = kPoolAlphabet,
+    .print_char_bool = true,
+    .print_summary = true,
+    .target_string = "cc",
+    .dev_benchmark = true,
+};
 
 static void PrintHelp_(void *param)
 {
@@ -168,14 +165,14 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
     // clang-format on
 
     if (res->status != kArgpxStatusSuccess) {
-        printf("%s: arguments error, stop at '%s'\n", SELF_NAME, res->current_argv_ptr);
+        printf(SELF_NAME ": arguments error, stop at '%s'\n", res->current_argv_ptr);
         printf("ArgParseX: %s\n", ArgpxStatusToString(res->status));
         exit(EXIT_FAILURE);
     }
 
     if (res->param_count >= 1) {
         if (res->param_count > 1) {
-            printf("%s: too many arguments: %d\n", SELF_NAME, res->param_count);
+            printf(SELF_NAME ": too many arguments: %d\n", res->param_count);
             exit(EXIT_FAILURE);
         }
 
@@ -190,7 +187,7 @@ static void ParseArguments_(struct Config *conf, int argc, char *argv[])
         } else if (strcmp(pool_name, "full-alphabet") == 0) {
             conf->sample_pool = kPoolFullAlphabet;
         } else {
-            printf("%s: invalid sample pool name\n", SELF_NAME);
+            printf(SELF_NAME ": invalid sample pool name\n");
         }
     }
 }
@@ -199,8 +196,7 @@ int main(int argc, char *argv[])
 {
     /* Handle CLI options */
 
-    struct Config conf;
-    ConfigInit_(&conf);
+    struct Config conf = kConfigInitializer;
     ParseArguments_(&conf, argc, argv);
 
     if (conf.dev_benchmark == true)
